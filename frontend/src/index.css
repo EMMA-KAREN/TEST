@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+:root {
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #edebf0;
+  overflow-x: hidden;
+}
+
+/* NAVBAR STYLING STRATS HERE */
+.Navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background-color: #13aa2c;
+  padding: 0;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Floating effect */
+}
+
+.Navbar-logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
+.Navbar-logo:hover {
+  color: #a66cff;
+}
+
+.Navbar-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.Navbar-links a {
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+.Navbar-links a:hover {
+  
+  font-style: italic;
+}
+
+.Navbar-links a:focus {
+  outline: none;
+}
+
+
+/* HOME STYLING STARTS HERE */
+.home-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align items at the top of the page */
+    height: auto; /* Full page height */
+    padding: 20px; /* Add some padding around the content */
+  }
+  
+  .home-container {
+    display: flex;
+    justify-content: flex-start; /* Align items to the left */
+    align-items: center; /* Vertically center the content */
+    padding: 40px 0;
+    width: 100%;
+    margin-top: auto; /* Push content down a bit from the navbar */
+  }
+  
+  .text-section {
+    text-align: right;
+    max-width: 50%; /* Adjust width of the text */
+    margin-right: 40px; /* Space between text and image */
+  }
+  
+  .Home-h1 {
+    color: black;
+    font-size: 70px;
+    font-family: 'Lobster', cursive;
+    margin-top: 2px;
+  }
+  
+  .Home-h1:hover {
+    color: #d0f500d7;
+  }
+  
+  .home-slogan {
+    font-size: 22px;
+    /* font-weight: bold; */
+  
+    color: black;
+    margin-top: 20px;
+    font-family: 'Merriweather', serif;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .home-slogan:hover {
+    color: #a66cff;
+  }
+
+  
+  .welcome-container {
+    animation-name: floating;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+  }
+  
+  @keyframes floating {
+    0%{
+        transform: translate(0, 0px);
+    }
+    50%{
+        transform: translate(0, 10px);
+    }
+    100%{
+        transform: translate(0, -0px);
+    }
+  }
+  
+  .Home-h1 {
+    color: black;
+    font-size: 70px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+  }
+  
+  .Home-h1:hover {
+    color: #d0f500d7;
+    text-shadow: 0 0 20px rgba(0, 255, 0, 0.8), 0 0 40px rgba(0, 255, 0, 0.6);
+  }
+  
