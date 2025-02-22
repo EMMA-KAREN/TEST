@@ -29,16 +29,26 @@ const UserProfile = () => {
   const [isLogOutModalOpen, setLogOutIsModalOpen] = useState(false);
 
   // Handle form submission
-  function handleSubmit(e) {
+  function handleSubmitRedFlag(e) {
     e.preventDefault();
     addRedFlag(title, description, image, video, location);
-    addIntervention(title, description, image, video, location);
     setTitle("");
     setDescription("");
     setImage("");
     setVideo("");
     setLocation("");
     setAddRedFlagIsModalOpen(false);
+  }
+
+  // Handle form submission
+  function handleSubmitIntervention(e) {
+    e.preventDefault();
+    addIntervention(title, description, image, video, location);
+    setTitle("");
+    setDescription("");
+    setImage("");
+    setVideo("");
+    setLocation("");
     setAddInterventionModalOpen(false);
   }
 
@@ -226,6 +236,8 @@ const UserProfile = () => {
                               className={`${
                                 red_flag.status === "active"
                                   ? "text-green-600"
+                                  : red_flag.status === "underinvestigation"
+                                  ? "text-yellow-600"
                                   : "text-red-500"
                               } text-lg font-semibold`}
                             >
@@ -322,6 +334,8 @@ const UserProfile = () => {
                               className={`${
                                 intervention.status === "active"
                                   ? "text-green-600"
+                                  : intervention.status === "underinvestigation"
+                                  ? "text-yellow-600"
                                   : "text-red-500"
                               } text-lg font-semibold`}
                             >
@@ -430,7 +444,7 @@ const UserProfile = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-transparent backdrop-blur-lg">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
             <h3 className="text-lg font-semibold mb-4">Add Red Flag</h3>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmitRedFlag}>
               <input
                 type="text"
                 placeholder="Title"
@@ -497,7 +511,7 @@ const UserProfile = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-transparent backdrop-blur-lg">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
             <h3 className="text-lg font-semibold mb-4">Add an Intervention</h3>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmitIntervention}>
               <input
                 type="text"
                 placeholder="Title"

@@ -3,7 +3,7 @@ import { InterventionContext } from "../context/InterventionContext";
 import { useParams } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
-export default function SingleRedFlag() {
+export default function SingleIntervention() {
   const { current_admin, current_user } = useContext(UserContext);
   const { interventions, updateIntervention, deleteIntervention } = useContext(InterventionContext);
   const { id } = useParams();
@@ -29,7 +29,7 @@ export default function SingleRedFlag() {
   function handleSubmitAdmin(e) {
     e.preventDefault();
     if (current_admin && intervention) {
-      updateRedFlag(status);
+      updateIntervention(status);
       setIsModalOpen(false);
     }
   }
@@ -150,8 +150,8 @@ export default function SingleRedFlag() {
                     onChange={handleStatusChange}
                     className="px-4 py-3 rounded-md border border-gray-400 bg-white text-black focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    <option value="active">Active</option>
-                    <option value="pending">Pending</option>
+                    <option value="underInvestigation">Under Investigation</option>
+                    <option value="rejected">Rejected</option>
                     <option value="resolved">Resolved</option>
                   </select>
                 </div>

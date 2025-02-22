@@ -151,8 +151,8 @@ export default function SingleRedFlag() {
                     onChange={handleStatusChange}
                     className="px-4 py-3 rounded-md border border-gray-400 bg-white text-black focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    <option value="active">Active</option>
-                    <option value="pending">Pending</option>
+                    <option value="underInvestigation">Under Investigation</option>
+                    <option value="rejected">Rejected</option>
                     <option value="resolved">Resolved</option>
                   </select>
                 </div>
