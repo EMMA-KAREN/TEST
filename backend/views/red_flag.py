@@ -1,6 +1,5 @@
 from flask import jsonify, request, Blueprint
-from models import db
-from models import Red_Flags, Users, Admins
+from models import RedFlags, Users, db, Admins
 from flask_jwt_extended import  jwt_required, get_jwt_identity, get_jwt
 from datetime import datetime
 from flask_mail import  Message
@@ -12,10 +11,12 @@ def get_mail():
 
 red_flag_bp = Blueprint("red_flag_bp", __name__)
 
+# ADD A RedFlag
 @red_flag_bp.route("/red_flag", methods=["POST"])
 @jwt_required()
 def add_red_flag():
     current_user_id = get_jwt_identity()
+    # user = Users.query.get(current_user_id)
     user = db.session.get(Users, current_user_id)
   
     data = request.get_json()
@@ -23,35 +24,26 @@ def add_red_flag():
 
     title = data['title']
     description = data['description']
-    image = data['image']  # URL for image
-    video = data['video']  # URL for video
+    image = data['image']
+    video = data['video']
     location = data['location']
     
+    
     status = data.get('status', 'active')  
+    
     user_id = current_user_id  
 
+    
+    # check_user = Users.query.get(user_id)
     check_user = db.session.get(Users, user_id)
 
     if not check_user:
         return jsonify({"error": "User doesn't exist"}), 406
     
-    new_red_flag = Red_Flags(
-        title=title, 
-        description=description, 
-        image=image,  # Storing the URL directly
-        video=video,  # Storing the URL directly
-        user_id=user_id, 
-        location=location, 
-        status=status
-    )
-
-    # if not title or not description or not location or not image or not video:
-    #     return jsonify({"error": "Missing required fields"}), 422
- 
+    new_red_flag = RedFlags( title=title, description=description, image=image, video=video, user_id=user_id, location=location, status=status)
+    
     db.session.add(new_red_flag)
     db.session.commit()
-
-    # Send email notification (this part remains the same)
     current_date = datetime.now().strftime("%d-%m-%Y")
     msg = Message('Red Flag Created', sender='iregisterweb@gmail.com', recipients=[user.email])
 
@@ -121,8 +113,6 @@ def add_red_flag():
                     <li><strong>Description:</strong> {description}</li>
                     <li><strong>Location:</strong> {location}</li>
                     <li><strong>Status:</strong> {status}</li>
-                    <li><strong>Image URL:</strong> {image}</li>
-                    <li><strong>Video URL:</strong> {video}</li>
                 </ul>
                 <p>Your red flag will be reviewed and addressed by the appropriate authorities. Thank you for your contribution to making a positive change!</p>
                 <p>If you need any assistance or have questions, feel free to reach out to our support team.</p>
@@ -138,6 +128,7 @@ def add_red_flag():
 
     # Send the email
     mail = get_mail()  
+    
     mail.send(msg)
     
     return jsonify({"success": "Red Flag added successfully"}), 201
@@ -151,37 +142,69 @@ def fetch_red_flags():
     current_user_id = get_jwt_identity()
     claims = get_jwt()
 
+    # If the user is an admin, return all red flags
     if claims.get('is_admin'):  
-        # Admin fetches all red flags
-        red_flags = Red_Flags.query.all()
+        red_flags = RedFlags.query.all()
+        red_flag_list = []
+        for red_flag in red_flags:
+            red_flag_list.append({
+                "id": red_flag.id,
+                "title": red_flag.title,
+                "description": red_flag.description,
+                "image": red_flag.image,
+                "video": red_flag.video,
+                "location": red_flag.location,
+                "status": red_flag.status,
+                "created_at": red_flag.created_at,
+                "user_id": {
+                    "id": red_flag.users.id,
+                    "First Name": red_flag.users.first_name,
+                    "Last Name": red_flag.users.last_name,
+                    "Email": red_flag.users.email,
+                    "Phone": red_flag.users.phone,
+                    "Profile Picture": red_flag.users.profile_picture
+                }
+            })
+        return jsonify(red_flag_list), 200
+
     else:
-        # Normal user fetches only their red flags
-        red_flags = Red_Flags.query.filter_by(user_id=current_user_id).all()
+        # user = Users.query.get(current_user_id)
+        user = db.session.get(Users, current_user_id)
+        if user:
+            
+            red_flags = RedFlags.query.all()
+            user_red_flags = RedFlags.query.filter_by(user_id=current_user_id).all()
+            
+           
+            all_red_flags = red_flags + user_red_flags
+            red_flag_list = []
 
-    red_flag_list = []
-    for red_flag in red_flags:
-        red_flag_list.append({
-            "id": red_flag.id,
-            "title": red_flag.title,
-            "description": red_flag.description,
-            "image": red_flag.image,
-            "video": red_flag.video,
-            "location": red_flag.location,
-            "status": red_flag.status,
-            "created_at": red_flag.created_at,
-            "user_id": red_flag.user_id,  # Make sure user_id is included
-            "user": {
-                "id": red_flag.users.id,
-                "First Name": red_flag.users.first_name,
-                "Last Name": red_flag.users.last_name,
-                "Email": red_flag.users.email,
-                "Phone": red_flag.users.phone,
-                "Profile Picture": red_flag.users.profile_picture
-            }
-        })
+            seen_ids = set()
+            for red_flag in all_red_flags:
+                if red_flag.id not in seen_ids:
+                    red_flag_list.append({
+                        "id": red_flag.id,
+                        "title": red_flag.title,
+                        "description": red_flag.description,
+                        "image": red_flag.image,
+                        "video": red_flag.video,
+                        "location": red_flag.location,
+                        "status": red_flag.status,
+                        "created_at": red_flag.created_at,
+                        "user_id": {
+                            "id": red_flag.users.id,
+                            "First Name": red_flag.users.first_name,
+                            "Last Name": red_flag.users.last_name,
+                            "Email": red_flag.users.email,
+                            "Phone": red_flag.users.phone,
+                            "Profile Picture": red_flag.users.profile_picture
+                        }
+                    })
+                    seen_ids.add(red_flag.id)
 
-    
-    return jsonify(red_flag_list), 200
+            return jsonify(red_flag_list), 200
+        else:
+            return jsonify({"error": "User not found"}), 404
 
 
 # FETCH A SINGLE Red FLAG RELATED TO THE CURRENT USER LOGED IN
@@ -189,7 +212,7 @@ def fetch_red_flags():
 @jwt_required()
 def fetch_red_flag(red_flag_id):
     current_user_id = get_jwt_identity()
-    red_flag =  Red_Flags.query.filter_by(id=red_flag_id, user_id=current_user_id).first()
+    red_flag = RedFlags.query.filter_by(id=red_flag_id, user_id=current_user_id).first()
 
     if red_flag:
         red_flag_data = {
@@ -224,8 +247,8 @@ def update_red_flag(red_flag_id):
 
     claims = get_jwt()
     if claims.get('is_admin'):
-        # red_flag =  Red_Flags.query.get(red_flag_id)
-        red_flag = db.session.get( Red_Flags, red_flag_id)
+        # red_flag = RedFlags.query.get(red_flag_id)
+        red_flag = db.session.get(RedFlags, red_flag_id)
         if red_flag:
             data = request.get_json()
             status = data.get('status', red_flag.status)
@@ -325,8 +348,8 @@ def update_red_flag(red_flag_id):
         # user = Users.query.get(claims.get('sub'))
         user = db.session.get(Users, claims.get('sub'))
         
-        # red_flag =  Red_Flags.query.get(red_flag_id)
-        red_flag = db.session.get( Red_Flags, red_flag_id)
+        # red_flag = RedFlags.query.get(red_flag_id)
+        red_flag = db.session.get(RedFlags, red_flag_id)
         if red_flag:
             data = request.get_json()
             title = data.get('title', red_flag.title)
@@ -433,8 +456,8 @@ def delete_red_flag(red_flag_id):
     user = db.session.get(Users, current_user_id )
 
     if user:
-        # red_flag =  Red_Flags.query.get(red_flag_id)
-        red_flag = db.session.get( Red_Flags, red_flag_id)
+        # red_flag = RedFlags.query.get(red_flag_id)
+        red_flag = db.session.get(RedFlags, red_flag_id)
         
         if not red_flag:
             return jsonify({"error": "Red Flag not found"}), 404
@@ -455,4 +478,5 @@ def delete_red_flag(red_flag_id):
 
 
    
+
 

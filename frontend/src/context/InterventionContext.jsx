@@ -4,20 +4,20 @@ import { UserContext } from "./UserContext";
 import { useNavigate } from "react-router-dom";
 import apiURL from "../config";
 
-export const RedFlagContext = createContext();
+export const InterventionContext = createContext();
 
-export const RedFlagProvider = ({ children }) => {
+export const InterventionProvider = ({ children }) => {
 
     const navigate = useNavigate();
     const { authToken } = useContext(UserContext);
-    const [red_flags, setRedFlags] = useState([]);
+    const [interventions, setInterventions] = useState([]);
     const [onChange, setOnChange] = useState(true);
 
   
-// FETCH RED FLAGS
+// FETCH Interventions
     useEffect(() => {
       if (authToken) {
-        fetch(`${apiURL}/red_flag`, {
+        fetch(`${apiURL}/intervention`, {
           method: "GET",
           headers: {
             "Content-type": "application/json",
@@ -26,19 +26,19 @@ export const RedFlagProvider = ({ children }) => {
         })
           .then((response) => response.json())
           .then((response) => {
-            setRedFlags(response);
+            setInterventions(response);
           })
           .catch((error) => {
-            console.error("Error fetching Red Flags:", error);
+            console.error("Error fetching Interventions:", error);
           });
       }
     }, [authToken, onChange]);
   
 
 // ADD A RED FLAD
-const addRedFlag = (title, description, image, video, location) => {
+const addIntervention = (title, description, image, video, location) => {
     toast.loading("Processing... ");
-    fetch(`${apiURL}/red_flag`, {
+    fetch(`${apiURL}/intervention`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
@@ -71,9 +71,9 @@ const addRedFlag = (title, description, image, video, location) => {
 
 
   // UPDATE RED FLAG
-  const updateRedFlag = (id, updated_title, updated_description, updated_image, updated_video, updated_status) => {
+  const updateIntervention = (id, updated_title, updated_description, updated_image, updated_video, updated_location, updated_status) => {
     
-    fetch(`${apiURL}/red_flag/${id}`, {
+    fetch(`${apiURL}/intervention/${id}`, {
       method: "PATCH",
       headers: {
         "Content-type": "application/json",
@@ -84,6 +84,7 @@ const addRedFlag = (title, description, image, video, location) => {
         description: updated_description,
         image: updated_image,
         video: updated_video,
+        location: updated_location,
         status: updated_status,
       }),
     })
@@ -104,10 +105,10 @@ const addRedFlag = (title, description, image, video, location) => {
 
 
   // DELETE RED FLAG
-  const deleteRedFlag = (id) => {
+  const deleteIntervention = (id) => {
     toast.loading("Deleting Red FALG ...");
   
-    fetch(`${apiURL}/red_flag/${id}`, {
+    fetch(`${apiURL}/intervention/${id}`, {
       method: "DELETE",
       headers: {
         'Content-type': 'application/json',
@@ -139,13 +140,13 @@ const addRedFlag = (title, description, image, video, location) => {
   
 
   const data = {
-    red_flags,
+    interventions,
     setOnChange,
-    addRedFlag,
-    updateRedFlag,
-    deleteRedFlag,
+    addIntervention,
+    updateIntervention,
+    deleteIntervention,
   };
 
 
-    return <RedFlagContext.Provider value={data}>{children}</RedFlagContext.Provider>;
+    return <InterventionContext.Provider value={data}>{children}</InterventionContext.Provider>;
 };    

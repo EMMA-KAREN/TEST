@@ -7,8 +7,9 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from models import db, Users, Admins, TokenBlocklist
+from models import db, Users, Admins, TokenBlocklist, Interventions
 from views.auth import auth_bp  
+from views.intervensions import intervention_bp
 
 @pytest.fixture
 def app():
@@ -35,6 +36,7 @@ def app():
         app.register_blueprint(user_bp)
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(intervention_bp)
 
     yield app
 

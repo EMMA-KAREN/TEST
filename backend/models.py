@@ -19,20 +19,23 @@ class Users(db.Model):
     phone = db.Column(db.Integer, unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)  
     
-    red_flags = db.relationship('Red_Flags', backref='users', lazy=True)
+    red_flags = db.relationship('RedFlags', backref='users', lazy=True)
     intervensions = db.relationship('Interventions', backref='users', lazy=True)
 
 # Red_Flags Table
-class Red_Flags(db.Model):
+class RedFlags(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    image = db.Column(db.String(512), nullable=True)
-    video = db.Column(db.String(512), nullable=True)
+    image = db.Column(db.String(512), nullable=True)  
+    video = db.Column(db.String(512), nullable=True)  
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     location = db.Column(db.String(255))
-    status = db.Column(db.String(50), default='active')  # Ensure this line is present
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status = db.Column(db.String(50), nullable=False)  
+
+   
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)    
 
 
 # Interventions Table
@@ -44,7 +47,8 @@ class Interventions(db.Model):
     image = db.Column(db.String(512), nullable=True)  
     video = db.Column(db.String(512), nullable=True)  
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    location = db.Column(db.String(255))  
+    location = db.Column(db.String(255)) 
+    status = db.Column(db.String(50), nullable=False) 
 
    
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

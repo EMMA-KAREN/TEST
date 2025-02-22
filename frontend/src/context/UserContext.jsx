@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import apiURL from "../config";
 
-export const UserContext = createContext();
+export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
     
@@ -16,8 +16,9 @@ export const UserProvider = ({ children }) => {
   const [current_user, setCurrentUser] = useState(null);
   const [current_admin, setCurrentAdmin] = useState(null);
   const [users, setUsers] = useState([])
+  const [admins, setAdmins] = useState([])
+
   const [onChange, setOnChange] = useState(true);
-  const [admins, setAdmins] = useState([]);
 
 // LOGIN
   const login = (email, password) => {
@@ -110,6 +111,20 @@ export const UserProvider = ({ children }) => {
       });
   }, []);
 
+  // FETCH ALL ADMINS
+  useEffect(() => {
+    fetch(`${apiURL}/admins`, {
+      method: "GET",
+      headers: {
+        "Content-type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        setAdmins(response);
+        console.log(response)
+      });
+  }, []);
 
   // FETCH CURRENT USER
   useEffect(() => {
@@ -194,7 +209,7 @@ export const UserProvider = ({ children }) => {
           if (response.success) {
             toast.success("Updated successfully");
             setOnChange(!onChange);
-            navigate("/profile");
+            // navigate("/profile");
           } else if (response.error) {
             toast.error("Details Not Updated");
           } else {
@@ -241,69 +256,19 @@ const deleteUser = (userId) => {
       });
   };
   
-  // FETCH ALL ADMINS
-  useEffect(() => {
-    fetch(`${apiURL}/admins`, {
-      method: "GET",
-      headers: {
-        "Content-type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        setAdmins(response);
-        console.log(response)
-      });
-  }, []);
-  
-
-  // const updateAdmin = (updated_phone, updated_email, updated_password, updated_profile_picture) => {
-  //   console.log("Updating admin...");
-  
-  //   fetch(`${apiURL}/admin/update`, {
-  //     method: "PATCH",
-  //     headers: {
-  //       "Content-type": "application/json",
-  //       Authorization: `Bearer ${authToken}`,
-  //     },
-  //     body: JSON.stringify({
-  //       phone: updated_phone,
-  //       email: updated_email,
-  //       password: updated_password || "", // Ensure empty password doesn't break request
-  //       profile_picture: updated_profile_picture,
-  //     }),
-  //   })
-  //     .then((resp) => resp.json())
-  //     .then((response) => {
-  //       console.log("Update response:", response);
-  
-  //       if (response.success) {
-  //         toast.success("Admin profile updated successfully");
-  //         setOnChange(!onChange);
-  //         setCurrentAdmin(response.updated_admin || response); // Ensure correct response
-  //       } else {
-  //         console.error("Update failed:", response);
-  //         toast.error("Failed to update admin profile");
-  //       }
-  //     })
-  //     .catch((error) => console.error("Error updating admin profile:", error));
-  // };
-  
 
     const data = {
       authToken,
       current_user,
       current_admin,
       users,
-      admins,
       login,
       logout,
       addUser,
       updateUser,
       deleteUser,
       setAdmins,
-      // updateAdmin
-      
+      admins,
     };
   
     return <UserContext.Provider value={data}>{children}</UserContext.Provider>;

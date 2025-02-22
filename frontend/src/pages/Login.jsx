@@ -1,4 +1,4 @@
-import { React, useContext, useState } from "react";
+import React,{useContext, useState } from "react";
 import { UserContext } from "../context/UserContext";
 import { signInWithGoogle, signInWithGithub } from "../firebase-config";
 import { Link } from "react-router-dom";
@@ -13,19 +13,20 @@ export default function Login() {
     e.preventDefault();
     login(email, password);
   }
+  
   return (
-    <div class="font-[sans-serif] max-sm:px-4 mt-10">
-      <div class="min-h-screen flex flex-col items-center justify-center">
-        <div class="grid md:grid-cols-2 items-center gap-4 max-md:gap-8 max-w-6xl max-md:max-w-lg w-full p-4 m-4 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.3)] rounded-md">
-          <div class="md:max-w-md w-full px-4 py-4">
+    <div className="font-[sans-serif] max-sm:px-4 mt-20 bg-[#05051e] rounded-4xl border-2 border-pink-200">
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="grid md:grid-cols-2 items-center gap-4 max-md:gap-8 max-w-6xl max-md:max-w-lg w-full p-4 m-4 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.3)] rounded-3xl border-2 border-white ">
+          <div className="md:max-w-md w-full px-4 py-4 ">
             <form onSubmit={handleSubmit}>
-              <div class="mb-12">
-                <h3 class="text-gray-800 text-3xl font-extrabold">Sign in</h3>
-                <p class="text-sm mt-4 text-gray-800">
-                  Don't have an account{" "}
+              <div className="mb-12">
+                <h3 className="text-white text-3xl font-extrabold">Sign in</h3>
+                <p className="text-sm mt-4 text-white">
+                  Don't have an account?{" "}
                   <Link
                     to={"/signup"}
-                    class="text-[#a66cff;] font-semibold hover:text-[#d0f500d7] hover:underline ml-1 whitespace-nowrap"
+                    className="text-pink-300 hover:text-white font-semibold ml-2 whitespace-nowrap"
                   >
                     Register here
                   </Link>
@@ -33,21 +34,21 @@ export default function Login() {
               </div>
 
               <div>
-                <label class="text-gray-800 text-xs block mb-2">Email</label>
-                <div class="relative flex items-center">
+                <label className="text-white text-ls block mb-2">Email</label>
+                <div className="relative flex items-center">
                   <input
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    class="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 pl-2 pr-8 py-3 outline-none"
+                    className="w-full text-white text-sm border-b border-gray-300 focus:border-blue-600 pl-2 pr-8 py-3 outline-none placeholder-white"
                     placeholder="Enter email"
                   />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="#bbb"
                     stroke="#bbb"
-                    class="w-[18px] h-[18px] absolute right-2"
+                    className="w-[18px] h-[18px] absolute right-2"
                     viewBox="0 0 682.667 682.667"
                   >
                     <defs>
@@ -78,22 +79,22 @@ export default function Login() {
                 </div>
               </div>
 
-              <div class="mt-8">
-                <label class="text-gray-800 text-xs block mb-2">Password</label>
-                <div class="relative flex items-center">
+              <div className="mt-8">
+                <label className="text-white text-ls block mb-2">Password</label>
+                <div className="relative flex items-center">
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    class="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 pl-2 pr-8 py-3 outline-none"
+                    className="w-full text-white text-sm border-b border-gray-300 focus:border-blue-600 pl-2 pr-8 py-3 outline-none placeholder-white"
                     placeholder="Enter password"
                   />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="#bbb"
                     stroke="#bbb"
-                    class="w-[18px] h-[18px] absolute right-2 cursor-pointer"
+                    className="w-[18px] h-[18px] absolute right-2 cursor-pointer"
                     viewBox="0 0 128 128"
                   >
                     <path
@@ -104,44 +105,44 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* <div class="flex flex-wrap items-center justify-between gap-4 mt-6">
-                <div class="flex items-center">
-                  <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                  <label for="remember-me" class="ml-3 block text-sm text-gray-800">
+              {/* <div className="flex flex-wrap items-center justify-between gap-4 mt-6">
+                <div className="flex items-center">
+                  <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                  <label for="remember-me" className="ml-3 block text-sm text-white">
                     Remember me
                   </label>
                 </div>
                 <div>
-                  <a href="jajvascript:void(0);" class="text-blue-600 font-semibold text-sm hover:underline">
+                  <a href="jajvascript:void(0);" className="text-blue-600 font-semibold text-sm hover:underline">
                     Forgot Password?
                   </a>
                 </div>
               </div> */}
 
-              <div class="mt-12">
+              <div className="mt-12">
                 <button
                   type="submit"
-                  class="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-black bg-[#a66cff;] hover:bg-[#d0f500d7] focus:outline-none"
+                  className="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-gray-700 hover:bg-white hover:text-black focus:outline-none"
                 >
                   Sign in
                 </button>
               </div>
 
-              <div class="my-4 flex items-center gap-4">
-                <hr class="w-full border-gray-300" />
-                <p class="text-sm text-gray-800 text-center">or</p>
-                <hr class="w-full border-gray-300" />
+              <div className="my-4 flex items-center gap-4">
+                <hr className="w-full border-gray-300" />
+                <p className="text-sm text-white text-center">or</p>
+                <hr className="w-full border-gray-300" />
               </div>
 
-              <div class="space-x-6 flex justify-center">
+              <div className="space-x-6 flex justify-center">
                 <button
                   type="button"
-                  class="border-none outline-none"
+                  className="border-none outline-none"
                   onClick={signInWithGoogle}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="w-7 h-7 inline"
+                    className="w-7 h-7 inline"
                     viewBox="0 0 512 512"
                   >
                     <path
@@ -178,12 +179,12 @@ export default function Login() {
                 </button>
                 <button
                   type="button"
-                  class="border-none outline-none"
+                  className="border-none outline-none"
                   onClick={signInWithGithub}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="w-7 h-7 inline"
+                    className="w-7 h-7 inline"
                     viewBox="0 0 512 512"
                   >
                     <path
@@ -196,10 +197,10 @@ export default function Login() {
             </form>
           </div>
 
-          <div class="w-full h-full flex items-center bg-[#a66cff;] rounded-xl p-8">
+          <div className="w-full h-full flex items-center bg-[#a66cff;] rounded-xl p-8">
             <img
               src="https://readymadeui.com/signin-image.webp"
-              class="w-full aspect-[12/12] object-contain"
+              className="w-full aspect-[12/12] object-contain"
               alt="login-image"
             />
           </div>

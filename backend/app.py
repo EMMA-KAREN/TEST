@@ -29,8 +29,6 @@ db.init_app(app)
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "fallbackSecretKey")  
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=55)
-app.config["UPLOAD_FOLDER"] = "uploads/"
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024 
 
 jwt = JWTManager(app)
 jwt.init_app(app)
@@ -40,7 +38,7 @@ from views import *
 app.register_blueprint(user_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(red_flag_bp)
-# app.register_blueprint(intervension_bp)
+app.register_blueprint(intervention_bp)
 # app.register_blueprint(contact_us_bp)
 
 # Test route

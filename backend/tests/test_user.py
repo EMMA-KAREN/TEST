@@ -1,6 +1,6 @@
 import json
 import pytest
-from models import db, Users, Red_Flags, Interventions
+from models import db, Users, RedFlags, Interventions
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_jwt_extended import create_access_token
 from unittest.mock import patch
