@@ -5,7 +5,7 @@ import { UserContext } from "../context/UserContext";
 
 export default function SingleIntervention() {
   const { current_admin, current_user } = useContext(UserContext);
-  const { interventions, updateIntervention, deleteIntervention } = useContext(InterventionContext);
+  const { interventions, updateIntervention, deleteIntervention, updateInterventionStatus } = useContext(InterventionContext);
   const { id } = useParams();
   const intervention = interventions && interventions.find((intervention) => intervention.id == id);
   const [title, setTitle] = useState("");
@@ -24,12 +24,12 @@ export default function SingleIntervention() {
     } else if (current_admin && intervention) {
       setStatus(intervention.status);
     }
-  }, [intervention]);
+  }, [current_user, current_admin, intervention]);
 
   function handleSubmitAdmin(e) {
     e.preventDefault();
     if (current_admin && intervention) {
-      updateIntervention(status);
+      updateInterventionStatus(intervention.id, status);
       setIsModalOpen(false);
     }
   }
@@ -44,22 +44,17 @@ export default function SingleIntervention() {
 
   function handleDelete(e) {
     e.preventDefault();
-    deleteIntervention(intervention.id)
+    deleteIntervention(intervention.id);
   }
 
   function toggleModal() {
     setIsModalOpen(!isModalOpen);
   }
 
-  function handleStatusChange(e) {
-    setStatus(e.target.value);
-  }
-
   const isOwner = current_user && intervention && intervention.user_id.id === current_user.id;
-
   return (
     <div className="flex justify-center items-center p-8 mt-8 w-full h-screen">
-      {/* Red Flag Detail Card */}
+      {/* Intervention Detail Card */}
       <div className="flex flex-row w-full max-w-[1200px] bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Image on the left */}
         <div className="w-[45%] h-[500px] bg-gray-100">
@@ -76,11 +71,11 @@ export default function SingleIntervention() {
           <div className="text-center">
             <h1 className="text-4xl font-semibold text-black">{title || "Untitled"}</h1>
             <h2 className="text-lg text-gray-700 uppercase font-medium mt-2">
-              Red Flag Details
+            Intervention Details
             </h2>
           </div>
 
-          {/* Red Flag Details */}
+          {/* Intervention Details */}
           <div className="space-y-4">
             <div className="flex flex-col">
               <h3 className="text-black">Reported By: </h3>
@@ -92,15 +87,15 @@ export default function SingleIntervention() {
             </div>
             <div className="flex flex-col">
               <h3 className="text-black">Description:</h3>
-              <p className="text-gray-800">{description}</p>
+              <p className="text-gray-800">{intervention?.description}</p>
             </div>
             <div className="flex flex-col">
-              <h3 className="text-black">Red Flag Status:</h3>
-              <p className="text-gray-800">{status}</p>
+              <h3 className="text-black">Intervention Status:</h3>
+              <p className="text-gray-800">{intervention?.status}</p>
             </div>
             <div className="flex flex-col">
               <h3 className="text-black">Video Link:</h3>
-              <a href={video} className="text-blue-600 hover:underline">
+              <a href={intervention?.video} className="text-blue-600 hover:underline">
                 Watch Video
               </a>
             </div>
@@ -118,8 +113,8 @@ export default function SingleIntervention() {
               </button>
             )}
 
-            {/* Only show Update button if the current user is the owner */}
-            {isOwner && (
+            {/*Update button */}
+            {(isOwner || current_admin) && (
               <button
                 onClick={toggleModal}
                 className="bg-green-600 text-white py-1 px-4 rounded-md text-sm transition-shadow hover:bg-green-700 focus:ring-2 focus:ring-green-500"
@@ -131,11 +126,13 @@ export default function SingleIntervention() {
         </div>
       </div>
 
-      {/* Modal for updating red flag */}
+      {/* Modal for updating Intervention */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-transparent backdrop-blur-lg flex justify-center items-center mt-16">
           <div className="bg-white rounded-lg p-6 w-full sm:w-[600px] md:w-[700px]">
-            <h2 className="text-2xl font-semibold text-black mb-4">Update Intervention</h2>
+            <h2 className="text-2xl font-semibold text-black mb-4">
+              {current_admin ? "Update Status" : "Update Intervention"}
+            </h2>
 
             <form
               onSubmit={current_admin ? handleSubmitAdmin : handleSubmitUser}
@@ -147,10 +144,10 @@ export default function SingleIntervention() {
                   <select
                     id="status"
                     value={status}
-                    onChange={handleStatusChange}
+                    onChange={(e) => setStatus(e.target.value)}
                     className="px-4 py-3 rounded-md border border-gray-400 bg-white text-black focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    <option value="underInvestigation">Under Investigation</option>
+                    <option value="under investigation">Under Investigation</option>
                     <option value="rejected">Rejected</option>
                     <option value="resolved">Resolved</option>
                   </select>
@@ -205,7 +202,7 @@ export default function SingleIntervention() {
                   type="submit"
                   className="w-[48%] bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  {current_admin ? "Update Status" : "Update Red Flag"}
+                  {current_admin ? "Update Status" : "Update Intervention"}
                 </button>
                 <button
                   onClick={toggleModal}

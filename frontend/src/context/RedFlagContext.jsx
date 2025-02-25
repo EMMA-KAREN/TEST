@@ -70,8 +70,8 @@ const addRedFlag = (title, description, image, video, location) => {
   };
 
 
-  // UPDATE RED FLAG
-  const updateRedFlag = (id, updated_title, updated_description, updated_image, updated_video, updated_status) => {
+  // UPDATE RED FLAG (as a normal user)
+  const updateRedFlag = (id, updated_title, updated_description, updated_image, updated_video) => {
     
     fetch(`${apiURL}/red_flag/${id}`, {
       method: "PATCH",
@@ -84,6 +84,33 @@ const addRedFlag = (title, description, image, video, location) => {
         description: updated_description,
         image: updated_image,
         video: updated_video,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((response) => {
+        if (response.success) {
+          toast.success("Red Flag Updated ");
+          setOnChange(!onChange)
+        } else if (response.error) {
+          toast.error("Red Flag Not Updated ");
+        } else {
+          alert("Failed to update");
+        }
+      })
+      .catch((error) => console.error("Error updating entry:", error));
+    console.log("Updating entry");
+  };
+
+   // UPDATE RED FLAG (as an admin)
+   const updateRedFlagStatus = (id, updated_status) => {
+    
+    fetch(`${apiURL}/red_flag/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({
         status: updated_status,
       }),
     })
@@ -101,6 +128,7 @@ const addRedFlag = (title, description, image, video, location) => {
       .catch((error) => console.error("Error updating entry:", error));
     console.log("Updating entry");
   };
+
 
 
   // DELETE RED FLAG
@@ -144,6 +172,7 @@ const addRedFlag = (title, description, image, video, location) => {
     addRedFlag,
     updateRedFlag,
     deleteRedFlag,
+    updateRedFlagStatus,
   };
 
 

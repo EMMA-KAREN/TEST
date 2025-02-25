@@ -25,7 +25,8 @@ const UserProfile = () => {
 
   // Modal state
   const [isAddRedFlagModalOpen, setAddRedFlagIsModalOpen] = useState(false);
-  const [isAddInterventionModalOpen, setAddInterventionModalOpen] = useState(false);
+  const [isAddInterventionModalOpen, setAddInterventionModalOpen] =
+    useState(false);
   const [isLogOutModalOpen, setLogOutIsModalOpen] = useState(false);
 
   // Handle form submission
@@ -235,10 +236,14 @@ const UserProfile = () => {
                             <span
                               className={`${
                                 red_flag.status === "active"
-                                  ? "text-green-600"
-                                  : red_flag.status === "underinvestigation"
+                                  ? "text-[#d580d8]"
+                                  : red_flag.status === "under investigation"
                                   ? "text-yellow-600"
-                                  : "text-red-500"
+                                  : red_flag.status === "rejected"
+                                  ? "text-red-600"
+                                  : red_flag.status === "resolved"
+                                  ? "text-green-600"
+                                  : ""
                               } text-lg font-semibold`}
                             >
                               {red_flag.status}
@@ -333,10 +338,14 @@ const UserProfile = () => {
                             <span
                               className={`${
                                 intervention.status === "active"
-                                  ? "text-green-600"
-                                  : intervention.status === "underinvestigation"
+                                  ? "text-[#d580d8]"
+                                  : intervention.status === "under investigation"
                                   ? "text-yellow-600"
-                                  : "text-red-500"
+                                  : intervention.status === "rejected"
+                                  ? "text-red-600"
+                                  : intervention.status === "resolved"
+                                  ? "text-green-600"
+                                  : ""
                               } text-lg font-semibold`}
                             >
                               {intervention.status}

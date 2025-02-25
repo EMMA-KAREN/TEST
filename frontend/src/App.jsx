@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
+import { RedFlagProvider } from "./context/RedFlagContext";
+import { InterventionProvider } from "./context/InterventionContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import SignUp from "./pages/SignUp";
@@ -9,8 +11,6 @@ import UserProfile from "./pages/UserProfile";
 import AdminProfile from "./pages/AdminProfile";
 import Contacts from "./pages/Contacts";
 import Profile from "./pages/Profile";
-import { RedFlagProvider } from "./context/RedFlagContext";
-import { InterventionProvider } from "./context/InterventionContext";
 import SingleRedFlag from "./pages/SingleRedFlag";
 import SingleIntervention from "./pages/SingleIntervention";
 import Settings from "./pages/Settings";

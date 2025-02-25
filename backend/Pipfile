@@ -13,6 +13,7 @@ python-dotenv = "*"
 flask-cors = "*"
 gunicorn = "*"
 pytest = "*"
+geopy = "*"
 
 [dev-packages]
 

@@ -445,6 +445,166 @@ def update_info():
 
     else:
         return jsonify({"error": "Details Not Updated"}), 406
+
+# google login
+@auth_bp.route("/google_login", methods=["POST"])    
+def google_login():
+    """Handles Google Login for users only"""
+    data = request.get_json()
+    email = data.get("email")
+
+    user = Users.query.filter_by(email=email).first()
+    admin = Admins.query.filter_by(email=email).first()
+    
+    if user:
+        access_token = create_access_token(identity=user.id, additional_claims={'is_user': True})
+        current_date = datetime.now().strftime("%d-%m-%Y")
+        msg = Message('Successful Login', sender='iregisterweb@gmail.com', recipients=[email])
+
+        msg.html = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Successful Login</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f9;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .container {{
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }}
+                .header {{
+                    text-align: center;
+                    padding-bottom: 20px;
+                }}
+                .header h1 {{
+                    color: #11172b;
+                    font-size: 24px;
+                }}
+                .body-content {{
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin-bottom: 20px;
+                }}
+                .footer {{
+                    font-size: 14px;
+                    color: #777;
+                    text-align: center;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Successful Login</h1>
+                </div>
+                <div class="body-content">
+                    <p>Hello {user.first_name} {user.last_name},</p>
+                    <p>You have successfully logged in to your iRegister account.</p>
+                    <p>If you did not initiate this login, please contact us immediately.</p>
+                    <p>Thank you for using iRegister!</p>
+                </div>
+                <div class="footer">
+                    <p><i>Sent on: {current_date}</i></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        mail = get_mail()
+        mail.send(msg)
+        return jsonify({"access_token": access_token}), 200
+
+    elif admin:
+        access_token = create_access_token(identity=admin.id, additional_claims={'is_admin': True})
+        current_date = datetime.now().strftime("%d-%m-%Y")
+        msg = Message('Successful Login', sender='iregisterweb@gmail.com', recipients=[email])
+
+        msg.html = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Successful Login</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f9;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .container {{
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }}
+                .header {{
+                    text-align: center;
+                    padding-bottom: 20px;
+                }}
+                .header h1 {{
+                    color: #11172b;
+                    font-size: 24px;
+                }}
+                .body-content {{
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin-bottom: 20px;
+                }}
+                .footer {{
+                    font-size: 14px;
+                    color: #777;
+                    text-align: center;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Successful Login</h1>
+                </div>
+                <div class="body-content">
+                    <p>Hello {admin.first_name} {admin.last_name},</p>
+                    <p>You have successfully logged in to your iRegister Admin account.</p>
+                    <p>If you did not initiate this login, please contact us immediately.</p>
+                    <p>Thank you for using iRegister!</p>
+                </div>
+                <div class="footer">
+                    <p><i>Sent on: {current_date}</i></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        mail = get_mail()
+        mail.send(msg)
+        return jsonify({"access_token": access_token}), 200
+
+    else:
+        return jsonify({"error": "Email not found for both User or Admin"}), 404
+
+
+   
+
+
 # done 
 # LOG OUT CURRENT USER
 @auth_bp.route("/logout", methods=["DELETE"])

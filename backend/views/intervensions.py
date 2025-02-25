@@ -11,7 +11,7 @@ def get_mail():
 
 intervention_bp = Blueprint("intervention_bp", __name__)
 
-# ADD A RedFlag
+# ADD AN INTERVENTION
 @intervention_bp.route("/intervention", methods=["POST"])
 @jwt_required()
 def add_intervention():
@@ -25,7 +25,7 @@ def add_intervention():
     data = request.get_json()
     
     # Debugging print
-    print("📩 Received Payload:", data)
+    print(" Received Payload:", data)
 
     if not data:
         return jsonify({"error": "Invalid JSON payload"}), 400
@@ -35,16 +35,31 @@ def add_intervention():
     # Check for missing fields
     for field in required_fields:
         if field not in data:
-            print(f"🚨 Missing field: {field}")
+            print(f" Missing field: {field}")
             return jsonify({"error": f"Missing field: {field}"}), 422
+        
+        
+    from geopy.geocoders import Nominatim
+    def get_coordinates(location):
+        geolocator = Nominatim(user_agent="interventions.py")
+        location_info = geolocator.geocode(location)
+        if location_info:
+            return location_info.latitude, location_info.longitude
+        else:
+            return "Location not found"
+
+    # location = "Nairobi Buruburu"
+    # coordinates = get_coordinates(location)
+    # print(f" {coordinates[0]} {coordinates[1]}")
+        
 
     title = data['title']
     description = data['description']
     image = data['image']
     video = data['video']
     location = data['location']
-    
-    
+    coordinates = get_coordinates(location)
+
     status = data.get('status', 'active')  
     
     user_id = current_user_id  
@@ -56,7 +71,7 @@ def add_intervention():
     if not check_user:
         return jsonify({"error": "User doesn't exist"}), 406
     
-    new_intervention = Interventions( title=title, description=description, image=image, video=video, user_id=user_id, location=location, status=status)
+    new_intervention = Interventions( title=title, description=description, image=image, video=video, user_id=user_id, location=location, coordinates=f"{coordinates[0]}, {coordinates[1]}", status=status)
     
     db.session.add(new_intervention)
     db.session.commit()
@@ -569,11 +584,39 @@ def delete_intervention(intervention_id):
             db.session.commit()
             return jsonify({"success": "Intervention deleted successfully"}), 200
         else:
-            return jsonify({"error": "Intervention must be 'resolved' to be deleted"}), 400
+            return jsonify({"error": "Intervention must be Resolved to be deleted"}), 400
     else:
         return jsonify({"error": "User not found or not authorized"}), 406
+    
+# Fetch all interventions
+@intervention_bp.route("/interventions/all", methods=["GET"])
+def fetch_all_interventions():
+    try:
+        interventions = Interventions.query.all()
+        intervention_list = []
 
+        for intervention in interventions:
+            intervention_list.append({
+                "id": intervention.id,
+                "title": intervention.title,
+                "description": intervention.description,
+                "image": intervention.image,
+                "video": intervention.video,
+                "location": intervention.location,
+                "coordinates": intervention.coordinates,
+                "status": intervention.status,
+                "created_at": intervention.created_at,
+                "user_id": {
+                    "id": intervention.users.id,
+                    "First Name": intervention.users.first_name,
+                    "Last Name": intervention.users.last_name,
+                    "Email": intervention.users.email,
+                    "Phone": intervention.users.phone,
+                    "Profile Picture": intervention.users.profile_picture
+                }
+            })
 
-   
+        return jsonify(intervention_list), 200
 
-
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

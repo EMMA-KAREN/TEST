@@ -70,7 +70,7 @@ const addIntervention = (title, description, image, video, location) => {
   };
 
 
-  // UPDATE RED FLAG
+  // UPDATE INTERVENTION (as a normal user)
   const updateIntervention = (id, updated_title, updated_description, updated_image, updated_video, updated_location, updated_status) => {
     
     fetch(`${apiURL}/intervention/${id}`, {
@@ -91,10 +91,38 @@ const addIntervention = (title, description, image, video, location) => {
       .then((resp) => resp.json())
       .then((response) => {
         if (response.success) {
-          toast.success("Red Flag Updated ");
+          toast.success("Intervention Updated ");
           setOnChange(!onChange)
         } else if (response.error) {
-          toast.error("Red Flag Not Updated ");
+          toast.error("Intervention Not Updated ");
+        } else {
+          alert("Failed to update");
+        }
+      })
+      .catch((error) => console.error("Error updating entry:", error));
+    console.log("Updating entry");
+  };
+
+  // UPDATE INTERVENTION STATUS  (as an admin)
+  const updateInterventionStatus = (id, updated_status) => {
+    
+    fetch(`${apiURL}/intervention/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({
+        status: updated_status,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((response) => {
+        if (response.success) {
+          toast.success("Intervention Updated ");
+          setOnChange(!onChange)
+        } else if (response.error) {
+          toast.error("Intervention Not Updated ");
         } else {
           alert("Failed to update");
         }
@@ -104,7 +132,7 @@ const addIntervention = (title, description, image, video, location) => {
   };
 
 
-  // DELETE RED FLAG
+  // DELETE Intervention
   const deleteIntervention = (id) => {
     toast.loading("Deleting Red FALG ...");
   
@@ -145,6 +173,7 @@ const addIntervention = (title, description, image, video, location) => {
     addIntervention,
     updateIntervention,
     deleteIntervention,
+    updateInterventionStatus,
   };
 
 

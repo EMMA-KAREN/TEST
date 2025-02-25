@@ -5,7 +5,7 @@ import { UserContext } from "../context/UserContext";
 
 export default function SingleRedFlag() {
   const { current_admin, current_user } = useContext(UserContext);
-  const { red_flags, updateRedFlag, deleteRedFlag } = useContext(RedFlagContext);
+  const { red_flags, updateRedFlag, deleteRedFlag, updateRedFlagStatus } = useContext(RedFlagContext);
   const { id } = useParams();
   const red_flag = red_flags && red_flags.find((red_flag) => red_flag.id == id);
   const [title, setTitle] = useState("");
@@ -24,12 +24,12 @@ export default function SingleRedFlag() {
     } else if (current_admin && red_flag) {
       setStatus(red_flag.status);
     }
-  }, [red_flag]);
+  }, [current_user, current_admin, red_flag]);
 
   function handleSubmitAdmin(e) {
     e.preventDefault();
     if (current_admin && red_flag) {
-      updateRedFlag(status);
+      updateRedFlagStatus(red_flag.id, status);
       setIsModalOpen(false);
     }
   }
@@ -51,11 +51,6 @@ export default function SingleRedFlag() {
     setIsModalOpen(!isModalOpen);
   }
 
-  function handleStatusChange(e) {
-    setStatus(e.target.value);
-  }
-
-  // Check if the current user is the owner of the red flag
   const isOwner = current_user && red_flag && red_flag.user_id.id === current_user.id;
 
   return (
@@ -93,15 +88,15 @@ export default function SingleRedFlag() {
             </div>
             <div className="flex flex-col">
               <h3 className="text-black">Description:</h3>
-              <p className="text-gray-800">{description}</p>
+              <p className="text-gray-800">{red_flag?.description}</p>
             </div>
             <div className="flex flex-col">
               <h3 className="text-black">Red Flag Status:</h3>
-              <p className="text-gray-800">{status}</p>
+              <p className="text-gray-800">{red_flag?.status}</p>
             </div>
             <div className="flex flex-col">
               <h3 className="text-black">Video Link:</h3>
-              <a href={video} className="text-blue-600 hover:underline">
+              <a href={red_flag?.video} className="text-blue-600 hover:underline">
                 Watch Video
               </a>
             </div>
@@ -119,8 +114,8 @@ export default function SingleRedFlag() {
               </button>
             )}
 
-            {/* Only show Update button if the current user is the owner */}
-            {isOwner && (
+            {/*Update button*/}
+            {(isOwner || current_admin) && (
               <button
                 onClick={toggleModal}
                 className="bg-green-600 text-white py-1 px-4 rounded-md text-sm transition-shadow hover:bg-green-700 focus:ring-2 focus:ring-green-500"
@@ -148,10 +143,10 @@ export default function SingleRedFlag() {
                   <select
                     id="status"
                     value={status}
-                    onChange={handleStatusChange}
+                    onChange={(e) => setStatus(e.target.value)}
                     className="px-4 py-3 rounded-md border border-gray-400 bg-white text-black focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    <option value="underInvestigation">Under Investigation</option>
+                    <option value="under investigation">Under Investigation</option>
                     <option value="rejected">Rejected</option>
                     <option value="resolved">Resolved</option>
                   </select>

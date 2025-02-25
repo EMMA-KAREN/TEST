@@ -31,7 +31,7 @@ def test_create_user():
             last_name="Doe",
             email="john@example.com",
             password="securepassword",
-            phone=1234567890
+            phone="1234567890"
         )
         db.session.add(user)
         db.session.commit()

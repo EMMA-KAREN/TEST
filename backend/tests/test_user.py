@@ -17,7 +17,7 @@ def test_register_user(client, app):
             "last_name": "Doe",
             "email": "johndoe@example.com",
             "password": "securepassword",
-            "phone": "987654321",
+            "phone": 987654321,
             "profile_picture": "https://example.com/profile.jpg"
         }
 

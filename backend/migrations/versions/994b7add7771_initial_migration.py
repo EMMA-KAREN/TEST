@@ -1,8 +1,8 @@
 """Initial Migration
 
-Revision ID: 9c7cb1ec66e8
+Revision ID: 994b7add7771
 Revises: 
-Create Date: 2025-02-21 13:07:09.655474
+Create Date: 2025-02-25 15:06:12.055662
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9c7cb1ec66e8'
+revision = '994b7add7771'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,6 +26,7 @@ def upgrade():
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('password', sa.String(length=512), nullable=False),
     sa.Column('phone', sa.Integer(), nullable=False),
+    sa.Column('provider', sa.String(length=50), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('phone')
@@ -53,9 +54,10 @@ def upgrade():
     sa.Column('last_name', sa.String(length=255), nullable=False),
     sa.Column('profile_picture', sa.String(length=512), nullable=True),
     sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('password', sa.String(length=512), nullable=False),
-    sa.Column('phone', sa.Integer(), nullable=False),
+    sa.Column('password', sa.String(length=512), nullable=True),
+    sa.Column('phone', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('provider', sa.String(length=50), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('phone')
@@ -69,6 +71,7 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('location', sa.String(length=255), nullable=True),
     sa.Column('status', sa.String(length=50), nullable=False),
+    sa.Column('coordinates', sa.String(length=255), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -82,6 +85,7 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('location', sa.String(length=255), nullable=True),
     sa.Column('status', sa.String(length=50), nullable=False),
+    sa.Column('coordinates', sa.String(length=255), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')

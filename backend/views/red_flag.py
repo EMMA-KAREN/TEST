@@ -22,13 +22,27 @@ def add_red_flag():
     data = request.get_json()
     print(data)
 
+    from geopy.geocoders import Nominatim
+    def get_coordinates(location):
+        geolocator = Nominatim(user_agent="interventions.py")
+        location_info = geolocator.geocode(location)
+        if location_info:
+            return location_info.latitude, location_info.longitude
+        else:
+            return "Location not found"
+
+    # location = "Nairobi Buruburu"
+    # coordinates = get_coordinates(location)
+    # print(f" {coordinates[0]} {coordinates[1]}")
+        
+
     title = data['title']
     description = data['description']
     image = data['image']
     video = data['video']
     location = data['location']
-    
-    
+    coordinates = get_coordinates(location)
+
     status = data.get('status', 'active')  
     
     user_id = current_user_id  
@@ -40,7 +54,7 @@ def add_red_flag():
     if not check_user:
         return jsonify({"error": "User doesn't exist"}), 406
     
-    new_red_flag = RedFlags( title=title, description=description, image=image, video=video, user_id=user_id, location=location, status=status)
+    new_red_flag = RedFlags( title=title, description=description, image=image, video=video, user_id=user_id, location=location, coordinates=f"{coordinates[0]}, {coordinates[1]}" ,status=status)
     
     db.session.add(new_red_flag)
     db.session.commit()
@@ -472,11 +486,39 @@ def delete_red_flag(red_flag_id):
             db.session.commit()
             return jsonify({"success": "Red Flag deleted successfully"}), 200
         else:
-            return jsonify({"error": "Red Flag must be 'resolved' to be deleted"}), 400
+            return jsonify({"error": "Red Flag must be Resolved to be deleted"}), 400
     else:
         return jsonify({"error": "User not found or not authorized"}), 406
+    
+# Fetch all red flags
+@red_flag_bp.route("/red_flags/all", methods=["GET"])
+def fetch_all_red_flags():
+    try:
+        red_flags = RedFlags.query.all()
+        red_flag_list = []
 
+        for red_flag in red_flags:
+            red_flag_list.append({
+                "id": red_flag.id,
+                "title": red_flag.title,
+                "description": red_flag.description,
+                "image": red_flag.image,
+                "video": red_flag.video,
+                "location": red_flag.location,
+                "coordinates": red_flag.coordinates,
+                "status": red_flag.status,
+                "created_at": red_flag.created_at,
+                "user_id": {
+                    "id": red_flag.users.id if red_flag.users else None,
+                    "First Name": red_flag.users.first_name if red_flag.users else None,
+                    "Last Name": red_flag.users.last_name if red_flag.users else None,
+                    "Email": red_flag.users.email if red_flag.users else None,
+                    "Phone": red_flag.users.phone if red_flag.users else None,
+                    "Profile Picture": red_flag.users.profile_picture if red_flag.users else None
+                } if red_flag.users else None
+            })
 
-   
+        return jsonify(red_flag_list), 200
 
-
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
