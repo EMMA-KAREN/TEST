@@ -1,11 +1,13 @@
 import React,{useContext, useState } from "react";
 import { UserContext } from "../context/UserContext";
-import { signInWithGoogle, signInWithGithub } from "../firebase-config";
 import { Link } from "react-router-dom";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
+
 
 export default function Login() {
   const { login } = useContext(UserContext);
-
+  const {google_login} = useContext(UserContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -13,7 +15,13 @@ export default function Login() {
     e.preventDefault();
     login(email, password);
   }
-  
+  const handleGoogleLogin = (credential) => {
+    const user = jwtDecode(credential);
+    console.log("Test ", user);
+
+    google_login(user.email); // Calls the main google_login function in the frontend
+};
+
   return (
     <div className="font-[sans-serif] max-sm:px-4 mt-20 bg-[#05051e] rounded-4xl border-2 border-pink-200">
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -135,64 +143,15 @@ export default function Login() {
               </div>
 
               <div className="space-x-6 flex justify-center">
-                <button
-                  type="button"
-                  className="border-none outline-none"
-                  onClick={signInWithGoogle}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-7 h-7 inline"
-                    viewBox="0 0 512 512"
-                  >
-                    <path
-                      fill="#fbbd00"
-                      d="M120 256c0-25.367 6.989-49.13 19.131-69.477v-86.308H52.823C18.568 144.703 0 198.922 0 256s18.568 111.297 52.823 155.785h86.308v-86.308C126.989 305.13 120 281.367 120 256z"
-                      data-original="#fbbd00"
-                    />
-                    <path
-                      fill="#0f9d58"
-                      d="m256 392-60 60 60 60c57.079 0 111.297-18.568 155.785-52.823v-86.216h-86.216C305.044 385.147 281.181 392 256 392z"
-                      data-original="#0f9d58"
-                    />
-                    <path
-                      fill="#31aa52"
-                      d="m139.131 325.477-86.308 86.308a260.085 260.085 0 0 0 22.158 25.235C123.333 485.371 187.62 512 256 512V392c-49.624 0-93.117-26.72-116.869-66.523z"
-                      data-original="#31aa52"
-                    />
-                    <path
-                      fill="#3c79e6"
-                      d="M512 256a258.24 258.24 0 0 0-4.192-46.377l-2.251-12.299H256v120h121.452a135.385 135.385 0 0 1-51.884 55.638l86.216 86.216a260.085 260.085 0 0 0 25.235-22.158C485.371 388.667 512 324.38 512 256z"
-                      data-original="#3c79e6"
-                    />
-                    <path
-                      fill="#cf2d48"
-                      d="m352.167 159.833 10.606 10.606 84.853-84.852-10.606-10.606C388.668 26.629 324.381 0 256 0l-60 60 60 60c36.326 0 70.479 14.146 96.167 39.833z"
-                      data-original="#cf2d48"
-                    />
-                    <path
-                      fill="#eb4132"
-                      d="M256 120V0C187.62 0 123.333 26.629 74.98 74.98a259.849 259.849 0 0 0-22.158 25.235l86.308 86.308C162.883 146.72 206.376 120 256 120z"
-                      data-original="#eb4132"
-                    />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className="border-none outline-none"
-                  onClick={signInWithGithub}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-7 h-7 inline"
-                    viewBox="0 0 512 512"
-                  >
-                    <path
-                      fill="#181717"
-                      d="M256 0c-141.4 0-256 114.6-256 256 0 113.6 73.9 210.5 176.2 244.5 12.9 2.4 17.6-5.6 17.6-11.2v-39.1c-71.5 15.6-86.3-30.4-86.3-30.4-11.6-29.5-28.4-37.4-28.4-37.4-23.2-15.8 1.7-15.5 1.7-15.5 25.6 1.8 39.1 26.2 39.1 26.2 22.3 38.1 58.7 27.1 72.9 20.8 2.3-16.1 8.7-27.1 15.9-33.4-61.9-7.1-126.3-31-126.3-137.4 0-30.3 10.8-55.3 28.6-74.8-2.9-7.2-12.3-36.5 2.7-76.1 0 0 23.3-7.5 76.1 28.6 22.1-6.1 45.9-9.2 69.5-9.3 23.6.1 47.4 3.2 69.5 9.3 52.8-36.1 76.1-28.6 76.1-28.6 15 39.6 5.7 68.9 2.7 76.1 17.8 19.5 28.6 44.5 28.6 74.8 0 106.4-64.4 130.2-126.3 137.3 9.7 8.1 18.3 24.1 18.3 48.6v71.4c0 5.6 4.7 13.7 17.6 11.2 102.3-34.1 176.2-130.9 176.2-244.5 0-141.4-114.6-256-256-256z"
-                    />
-                  </svg>
-                </button>
+              <GoogleLogin
+                  onSuccess={credentialResponse => {
+                      handleGoogleLogin(credentialResponse.credential);
+                  }}
+                  onError={() => {
+                      console.log('Google Login Failed');
+                  }}
+              />
+
               </div>
             </form>
           </div>

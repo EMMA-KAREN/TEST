@@ -2,8 +2,8 @@ import React from "react";
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import apiURL from "../config";
 
+import apiURL  from "../config";
 export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
@@ -56,6 +56,58 @@ export const UserProvider = ({ children }) => {
 
           toast.success("Successfully Logged in");
           // navigate("/");
+        } else if (response.error) {
+          toast.dismiss();
+          toast.error(response.error);
+        } else {
+          toast.dismiss();
+          toast.error("Failed to login");
+        }
+      });
+  };
+
+  //  google login 
+const google_login = (email) => {
+  toast.loading("Logging you in ... ");
+  fetch(`${apiURL}/google_login`, {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify({ email }),
+  })
+    .then((resp) => resp.json())
+    .then((response) => {
+      toast.dismiss();
+
+      if (response.error) {
+        toast.error(response.error);
+        return; 
+      }
+
+      if (response.access_token) {
+        sessionStorage.setItem("token", response.access_token);
+        setAuthToken(response.access_token);
+
+        fetch(`${apiURL}/current_user`, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${response.access_token}`,
+          },
+        })
+        .then((response) => response.json())
+            .then((response) => {
+              console.log(response); 
+
+              if (response.is_admin) {
+                setCurrentAdmin(response);
+                navigate("/adminprofile")  
+              } else {
+                setCurrentUser(response);
+                navigate("/userprofile")                 }
+            });
+
+          toast.success("Successfully Logged in");
+          
         } else if (response.error) {
           toast.dismiss();
           toast.error(response.error);
@@ -131,7 +183,7 @@ export const UserProvider = ({ children }) => {
     if (authToken) {
       fetchCurrentUser();
     }
-  }, [authToken,onChange]);
+  }, [authToken]);
 
   const fetchCurrentUser = () => {
     fetch(`${apiURL}/current_user`, {
@@ -153,7 +205,7 @@ export const UserProvider = ({ children }) => {
 
 
   // ADD USER
-  const addUser = (first_name, last_name, phone, email, password, profile_picture = null) => {
+  const addUser = (first_name, last_name, phone, email, password, profile_picture = null, provider="email") => {
     toast.loading("Registering ... ");
     fetch(`${apiURL}/user`, {
       method: "POST",
@@ -167,25 +219,27 @@ export const UserProvider = ({ children }) => {
         email,
         password,
         profile_picture,
+        provider,
       }),
     })
       .then((resp) => resp.json())
       .then((response) => {
-        toast.dismiss();  // Make sure to dismiss before navigating
-        if (response.success) {
+        toast.dismiss();  
+        if (response.msg) {
           toast.success("User added successfully");
           setTimeout(() => {
-            navigate("/login"); // Give it a short time to dismiss the toast
-          }, 500); // Adjust the timeout as needed
-        } else if (response.error) {
+            navigate("/login");
+          }, 500); 
+        } 
+        else if(email.error)
+          {
+            toast.error("Email already exists");
+            navigate("/login")
+            }
+        else if (response.error) {
           toast.error(response.error);
         }
       })
-      .catch((error) => {
-        toast.dismiss();
-        toast.error("Network error, please try again");
-        console.error("Error during user registration:", error);
-      });
   };
 
 
@@ -257,20 +311,21 @@ const deleteUser = (userId) => {
   };
   
 
-    const data = {
-      authToken,
-      current_user,
-      current_admin,
-      users,
-      login,
-      logout,
-      addUser,
-      updateUser,
-      deleteUser,
-      setAdmins,
-      admins,
-    };
-  
-    return <UserContext.Provider value={data}>{children}</UserContext.Provider>;
+  const data = {
+    authToken,
+    current_user,
+    current_admin,
+    users,
+    login,
+    logout,
+    addUser,
+    updateUser,
+    deleteUser,
+    setAdmins,
+    google_login,
+    admins,
+  };
+
+  return <UserContext.Provider value={data}>{children}</UserContext.Provider>;
 
 }

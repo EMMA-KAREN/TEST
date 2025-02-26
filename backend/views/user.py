@@ -4,6 +4,13 @@ from flask_jwt_extended import  jwt_required, get_jwt_identity, get_jwt
 from werkzeug.security import generate_password_hash
 from flask_mail import  Message
 from datetime import datetime
+from flask_jwt_extended import create_access_token
+
+def generate_token(user):
+    identity = user.id if user.provider != "google.com" else user.email  # Use email for Google users
+    additional_claims = {"is_admin": user.is_admin, "is_user": not user.is_admin}
+    
+    return create_access_token(identity=identity, additional_claims=additional_claims)
 
 def get_mail():
     from app import mail  # Import `mail` only when needed
@@ -17,47 +24,72 @@ user_bp = Blueprint("user_bp", __name__)
 @user_bp.route("/user", methods=["POST"])
 def register_user():
     data = request.get_json()
-    first_name = data["first_name"]
-    last_name = data["last_name"]
-    email = data["email"]
-    password = data["password"]
-    phone = data["phone"]
-    profile_picture = data["profile_picture"]
 
-    check_email = Users.query.filter_by(email=email).first()
-    print("email", check_email)
-    if check_email:
-        return jsonify({"error": "Email exists"}), 404
-    
-    check_phone = Users.query.filter_by(phone=phone).first()
-    print("phone", check_phone)
-    if check_phone:
-        return jsonify({"error": "Phone Number exists"}), 404
-     
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
+    email = data.get("email")
+    phone = data.get("phone")
+    profile_picture = data.get("profile_picture")
+    provider = data.get("provider", "email")
+    password = data.get("password") 
+
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    # For email-based sign-ups, ensure a password is provided
+    if provider != "google.com" and not password:
+        return jsonify({"error": "Password is required"}), 400
+
+    # Check if email already exists
+    existing_user = Users.query.filter_by(email=email).first()
+    if existing_user:
+        return jsonify({
+            "email_error": "User already exists"
+        }), 200
+
+    # Only validate phone number if not signing in with Google
+    if provider != "google.com" and phone:
+        check_phone = Users.query.filter_by(phone=phone).first()
+        if check_phone:
+            return jsonify({"error": "Phone Number exists"}), 400
     else:
-        new_user = Users(first_name=first_name, last_name=last_name, email=email, password=generate_password_hash(password), phone=phone, profile_picture=profile_picture)
-        db.session.add(new_user)
-        db.session.commit()
+        phone = None  # Google users may not have a phone number
 
-        current_date = datetime.now().strftime("%d-%m-%Y")
-        msg = Message('Welcome to iRegister', sender='iregisterweb@gmail.com', recipients=[email])
+    if not existing_user:
+    
+        hashed_password = generate_password_hash(password) 
+        new_user = Users(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            profile_picture=profile_picture,
+            password=hashed_password
+        )
+        
+    db.session.add(new_user)
+    db.session.commit()
 
-        msg.html = f"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Welcome to Delta Bank</title>
-            <style>
-                body {{
+    # Send Welcome Email
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    msg = Message('Welcome to iRegister', sender='iregisterweb@gmail.com', recipients=[email])
+
+    msg.html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>Welcome to Delta Bank</title>
+         <style>
+            body {{
                     font-family: Arial, sans-serif;
                     color: #333;
                     background-color: #f4f4f9;
                     margin: 0;
                     padding: 0;
-                }}
-                .container {{
+            }}
+            .container {{
                     width: 100%;
                     max-width: 600px;
                     margin: 0 auto;
@@ -65,25 +97,25 @@ def register_user():
                     background-color: #ffffff;
                     border-radius: 8px;
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                }}
-                .header {{
+             }}
+            .header {{
                     text-align: center;
                     padding-bottom: 20px;
-                }}
-                .header h1 {{
+             }}
+            .header h1 {{
                     color: #11172b;
-                }}
-                .body-content {{
+            }}
+            .body-content {{
                     font-size: 16px;
                     line-height: 1.6;
                     margin-bottom: 20px;
-                }}
-                .footer {{
+            }}
+            .footer {{
                     text-align: center;
                     font-size: 14px;
                     color: #777;
-                }}
-                .cta-button {{
+            }}
+            .cta-button {{
                     display: inline-block;
                     padding: 10px 20px;
                     background-color: #1E90FF;
@@ -91,36 +123,36 @@ def register_user():
                     text-decoration: none;
                     border-radius: 5px;
                     font-weight: bold;
-                }}
-            </style>
-        </head>
-        <body>
-           <div class="container">
-                <div class="header">
-                    <h1>Welcome to iReporter !</h1>
-                </div>
-                <div class="body-content">
-                    <p>Hello {first_name} {last_name},</p>
-                    <p>Welcome aboard! 🎉 We're excited to have you join the iReporter community.</p>
-                    <p>At iReporter, we empower citizens like you to take action against corruption and advocate for positive change. You're now part of a movement to report issues and push for government intervention on critical matters.</p>
-                    <p>If you need any help, our support team is here for you. Reach out anytime!</p>
-                    <p>We look forward to making an impact together.</p>
-                </div>
-                <div class="footer">
-                    <p>Best regards,<br>The iReporter Team</p>
-                    <p><i>Sent on: {current_date}</i></p>
-                </div>
+             }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                 <h1>Welcome to iReporter !</h1>
             </div>
-        </body>
-        </html>
+            <div class="body-content">
+                <p>Hello {first_name} {last_name},</p>
+                <p>Welcome aboard! 🎉 We're excited to have you join the iReporter community.</p>
+                <p>At iReporter, we empower citizens like you to take action against corruption and advocate for positive change. You're now part of a movement to report issues and push for government intervention on critical matters.</p>
+                <p>If you need any help, our support team is here for you. Reach out anytime!</p>
+                <p>We look forward to making an impact together.</p>
+            </div>
+            <div class="footer">
+                <p>Best regards,<br>The iReporter Team</p>
+                <p><i>Sent on: {current_date}</i></p>
+            </div>
+         </div>
+    </body>
+    </html>
         """
 
         # Before sending the email, get the `mail` instance
-        mail = get_mail()
-        mail.send(msg)
+    mail = get_mail()
+    mail.send(msg)
 
         
-        return jsonify({"msg": "User Registered Successfully"}), 200
+    return jsonify({"msg": "User Registered Successfully"}), 200
     
 # FETCH ALL USERS
 @user_bp.route("/users")
@@ -216,4 +248,3 @@ def delete_user(user_id):
     
     else:
         return jsonify({"error": "You must be logged in as a User or Admin to delete an account"}), 403
-

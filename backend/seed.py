@@ -2,71 +2,110 @@ from app import app
 from models import db, Users, Admins, RedFlags, Interventions
 from werkzeug.security import generate_password_hash
 from datetime import datetime
-from geopy.geocoders import Nominatim
+import random
 
-# Initialize geocoder
-geolocator = Nominatim(user_agent="seed.py")
-
-# Function to get coordinates from a location name
-def get_coordinates(location):
-    location_obj = geolocator.geocode(location)
-    if location_obj:
-        return (location_obj.latitude, location_obj.longitude)
-    return None
+# List of diverse locations across Kenya and Uganda with fixed coordinates
+locations = [
+    ("Nairobi, CBD", "-1.286389, 36.817223"),
+    ("Mombasa, Nyali", "-4.043477, 39.668206"),
+    ("Kisumu, Milimani", "-0.102206, 34.761711"),
+    ("Nakuru, Lanet", "-0.303099, 36.080025"),
+    ("Eldoret, Pioneer", "0.514277, 35.269779"),
+    ("Thika, Makongeni", "-1.03326, 37.06933"),
+    ("Nyeri, Ruring'u", "-0.416469, 36.951067"),
+    ("Meru, Makutano", "0.046307, 37.655894"),
+    ("Garissa, Township", "-0.456944, 39.646667"),
+    ("Kitale, Milimani", "1.01575, 35.00632"),
+    ("Kampala, Kololo", "0.313611, 32.581111"),
+    ("Entebbe, Kitoro", "0.0517, 32.4469"),
+    ("Jinja, Nalufenya", "0.4244, 33.2042"),
+    ("Gulu, Pece", "2.7746, 32.2989"),
+    ("Mbale, Wanale", "1.0646, 34.1794"),
+    ("Mbarara, Kakoba", "-0.6072, 30.6545"),
+    ("Fort Portal, Kabarole", "0.671, 30.2756"),
+    ("Masaka, Kimaanya", "-0.3291, 31.7341"),
+    ("Lira, Adyel", "2.2491, 32.8998"),
+    ("Soroti, Pamba", "1.7146, 33.6111")
+]
 
 with app.app_context():
 
-
-    # Delete all rows in the Loan and User tables
+    # Delete all rows in the tables
     RedFlags.query.delete()
     Interventions.query.delete()
     Users.query.delete()
     Admins.query.delete()
 
-    # Create an empty list
+    # Create empty lists
     users = []
     red_flags = []
     interventions = []
     admins = []
 
-    # data = request.get_json()
     password = "1234"
-    
-    
-    # Users seeds
-    users.append(Users(first_name="Hamza", last_name="Ali", email="david.kakhayanga@student.moringaschool.com", phone=1234567890, password=generate_password_hash(password), profile_picture="https://img.freepik.com/premium-photo/memoji-happy-man-white-background-emoji_826801-6830.jpg?w=740"))
-    users.append(Users(first_name="John", last_name="Doe", email="bokeje4980@btcours.com", phone=123456, password=generate_password_hash(password), profile_picture="https://img.freepik.com/premium-photo/memoji-happy-man-white-background-emoji_826801-6830.jpg?w=740"))
-   
-    # # Red flag seeds
-    location_1 = "Nairobi, Buruburu"
-    location_2 = " Kitengela"
-    coordinates_1 = get_coordinates(location_1)
-    coordinates_2 = get_coordinates(location_2)
-    
-    red_flags.append(RedFlags(title="Corruption in Government Contracts", description="This red flag indicates the involvement of bribery and corruption in securing government contracts, leading to unfair advantages and misappropriation of funds.", image="corruption_in_government_contracts.jpg", video="corruption_in_government_contracts_video.mp4", created_at=datetime.utcnow(), location=location_1, coordinates=f"{coordinates_1[0]}, {coordinates_1[1]}", status="active", user_id=1))
-    red_flags.append(RedFlags(title="Corruption in Government Contracts 2", description="This red flag indicates the involvement of bribery and corruption in securing government contracts, leading to unfair advantages and misappropriation of funds.", image="corruption_in_government_contracts.jpg", video="corruption_in_government_contracts_video.mp4", created_at=datetime.utcnow(), location=location_2, coordinates=f"{coordinates_2[0]}, {coordinates_2[1]}", status="active", user_id=2))
-    
-    # # Interventions seeds
-     # # Red flag seeds
-    location_3 = "Nairobi, Umoja"
-    location_4 = " Rongai"
-    coordinates_3 = get_coordinates(location_3)
-    coordinates_4 = get_coordinates(location_4)
-    
-    interventions.append(Interventions(title="Unsafe Workplace Conditions", description="This red flag indicates hazardous working environments, including exposed electrical wires and poorly maintained equipment.", image="unsafe_workplace.jpg", video="unsafe_workplace_video.mp4", created_at=datetime.utcnow(), location=location_3,coordinates=f"{coordinates_3[0]}, {coordinates_3[1]}", status="active", user_id=1))
-    interventions.append(Interventions(title="Unsafe Workplace Conditions 2", description="This red flag indicates hazardous working environments, including exposed electrical wires and poorly maintained equipment.", image="unsafe_workplace.jpg", video="unsafe_workplace_video.mp4", created_at=datetime.utcnow(), location=location_4,coordinates=f"{coordinates_4[0]}, {coordinates_4[1]}", status="active", user_id=2))
 
-        
-    # ADMIN SEEDS
-    admins.append(Admins(first_name = "David", last_name = "Parsley", email = "davidparsley.kakhayanga@gmail.com", phone = 1111111 , password=generate_password_hash(password), profile_picture="https://img.freepik.com/premium-photo/memoji-african-american-man-white-background-emoji_826801-6856.jpg?w=740"))
-    admins.append(Admins(first_name = "Emmaculate", last_name = "Mwikali", email = "mwikaliemmaculate6@gmail.com", phone = 2222222 , password=generate_password_hash(password), profile_picture="https://img.freepik.com/premium-photo/occupational-therapist-digital-avatar-generative-ai_934475-9352.jpg?w=740"))
-    admins.append(Admins(first_name = "Kevin", last_name = "Bett", email = "kevin.bett3@student.moringaschool.com", phone = 3333333 , password=generate_password_hash(password), profile_picture="https://img.freepik.com/premium-photo/memoji-african-american-man-white-background-emoji_826801-6858.jpg?w=740"))
+    # Seed Users
+    for i in range(5):
+        users.append(Users(
+            first_name=f"User{i+1}",
+            last_name=f"Last{i+1}",
+            email=f"user{i+1}@example.com",
+            phone=random.randint(1000000000, 9999999999),
+            password=generate_password_hash(password),
+            profile_picture="https://img.freepik.com/premium-photo/memoji-happy-man-white-background-emoji_826801-6830.jpg?w=740"
+        ))
 
-    # Insert each Loan and User in the list into the database tables
+    # Seed Admins
+    for i in range(3):
+        admins.append(Admins(
+            first_name=f"Admin{i+1}",
+            last_name=f"AdminLast{i+1}",
+            email=f"admin{i+1}@example.com",
+            phone=random.randint(1000000, 9999999),
+            password=generate_password_hash(password),
+            profile_picture="https://img.freepik.com/premium-photo/memoji-african-american-man-white-background-emoji_826801-6858.jpg?w=740"
+        ))
+
+    # Get unique locations for red flags and interventions
+    unique_locations = random.sample(locations, 20)
+
+    # Seed 10 RedFlags
+    for i in range(10):
+        location, coordinates = unique_locations.pop()
+        red_flags.append(RedFlags(
+            title=f"Red Flag Title {i+1}",
+            description=f"Description for red flag {i+1}",
+            image="red_flag_image.jpg",
+            video="red_flag_video.mp4",
+            created_at=datetime.utcnow(),
+            location=location,
+            coordinates=coordinates,
+            status="active",
+            user_id=random.randint(1, 5)
+        ))
+
+    # Seed 10 Interventions
+    for i in range(10):
+        location, coordinates = unique_locations.pop()
+        interventions.append(Interventions(
+            title=f"Intervention Title {i+1}",
+            description=f"Description for intervention {i+1}",
+            image="intervention_image.jpg",
+            video="intervention_video.mp4",
+            created_at=datetime.utcnow(),
+            location=location,
+            coordinates=coordinates,
+            status="active",
+            user_id=random.randint(1, 5)
+        ))
+
+    # Insert into database
     db.session.add_all(users)
+    db.session.add_all(admins)
     db.session.add_all(red_flags)
     db.session.add_all(interventions)
-    db.session.add_all(admins)
 
-    # Commit the transaction
+    # Commit transaction
     db.session.commit()
+
+    print("Database seeded successfully!")
